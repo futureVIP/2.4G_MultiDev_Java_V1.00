@@ -13,12 +13,13 @@ import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Timer;
+import java.util.Vector;
+
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -53,6 +54,7 @@ import com.jietong.rfid.uhf.entity.EPC;
 import com.jietong.rfid.uhf.tool.CallBack;
 import com.jietong.rfid.util.ReaderUtil;
 import com.jietong.util.Message;
+import com.jietong.window.basicOperation.BasicTable;
 import com.jietong.window.basicOperation.BasicTableHeadUI;
 import com.jietong.window.basicOperation.ConnectTableHeadUI;
 import com.jietong.window.basicOperation.SocketConnect;
@@ -513,7 +515,7 @@ public class MainStart extends JFrame {
 	public static SocketConnect connect = new SocketConnect();
 	private JButton btn_net_params_default_set;
 	SerialPortServiceImpl serialPortService = new SerialPortServiceImpl();
-	private List<EPC> listEPC = new ArrayList<EPC>();
+	private List<EPC> listEPC = new Vector<EPC>();
 
 	/**
 	 * Create the frame.
@@ -901,6 +903,7 @@ public class MainStart extends JFrame {
 		panel_readerData.add(chkSingleDevice);
 
 		lbl_resultCount = new JLabel("0");
+		lbl_resultCount.setForeground(Color.RED);
 		lbl_resultCount.setBounds(83, 8, 54, 15);
 		panel_readerData.add(lbl_resultCount);
 
@@ -2064,8 +2067,7 @@ public class MainStart extends JFrame {
 		});
 	}
 
-	public static void addToList(final List<ConnectInfo> list, String device,
-			int port, String state, int id) {
+	public static void addToList(final List<ConnectInfo> list, String device,int port, String state, int id) {
 		// 第一次读入数据
 		if (list.isEmpty()) {
 			list.clear();
@@ -2097,78 +2099,21 @@ public class MainStart extends JFrame {
 				list.add(connect);
 			}
 		}
-		tableConnectModel.setRowCount(0);
+		//tableConnectModel.setRowCount(0);
 		int idcount = 1;
+		tableConnectModel.getDataVector().removeAllElements();
 		for (ConnectInfo connectInfo : list) {
 			Object[] rowValues = { idcount, connectInfo.getDeviceNo(),connectInfo.getPort(), connectInfo.getState(), 0 };
 			tableConnectModel.addRow(rowValues);
 			idcount++;
 		}
 	}
-	
-	public void dataFilter(List<EPC> listEPC, String data, String deviceId) {
-		if (listEPC.isEmpty()) {
-			EPC epcTag = new EPC();
-			epcTag.setId(1);
-			epcTag.setData(data);
-			epcTag.setDeviceId(deviceId);
-			epcTag.setCount(1);
-			listEPC.add(epcTag);
-		} else {
-			for (int i = 0; i < listEPC.size(); i++) {
-				int count = listEPC.size();
-				EPC mEPC = listEPC.get(i);
-				if (data.equals(mEPC.getData()) && deviceId.equals(mEPC.getDeviceId())) {
-					mEPC.setCount(mEPC.getCount()+1);
-					listEPC.set(i, mEPC);
-					break;
-				} else if (i == (listEPC.size() - 1)) {
-					count++;
-					EPC newEPC = new EPC();
-					newEPC.setId(count);
-					newEPC.setData(data);
-					newEPC.setDeviceId(deviceId);
-					newEPC.setCount(1);
-					listEPC.add(newEPC);
-				}
-			}
-		}
-	}
-	
-	public void addToList(final List<EPC> listEPC2, final String data,final String deviceId) {
-		synchronized(this){
-			dataFilter(listEPC2, data, deviceId);
-			tableModel.setRowCount(0);
-			tableInfoShow(listEPC);
-			showCount(listEPC);
-		}
-	}
-	
-	private void showCount(final List<EPC> listEPC2) {
-		Map<String,String> dataMap = new HashMap<String,String>();
-		int tagCount = 0;
-		for (int i = 0; i < listEPC2.size(); i++) {
-			dataMap.put(listEPC2.get(i).getData(), listEPC2.get(i).getData());
-		}
-		tagCount = dataMap.size();
-		lbl_resultCount.setText(String.valueOf(tagCount));
-	}
 
-	public synchronized void tableInfoShow(final List<EPC> listEPC) {
-		// 添加数据到table中
-		for (int j = 0; j < listEPC.size() ; j++) {
-			// 获取集合中的数据
-			Object[] rowValues = {listEPC.get(j).getId(), listEPC.get(j).getData(),listEPC.get(j).getCount(),null, listEPC.get(j).getDeviceId()};
-			tableModel.addRow(rowValues); // 添加一行
-		}
-	}
-	
-	
 	class GetDatas implements CallBack {
 		@Override
 		public void getReadData(String data, int antNo,String deviceId) {
-			addToList(listEPC, data, deviceId);
 			System.out.println(data);
+			BasicTable.tableInfoShow(data, deviceId);
 		}
 	}
 }
