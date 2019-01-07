@@ -10,12 +10,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import com.jietong.rfid.uhf.dao.impl.Reader;
+import com.jietong.window.util.ReaderUtil;
+import com.jietong.window.view.ConnectDeviceManagerJPanel;
 
-import com.jietong.MainStart;
-import com.jietong.rfid.uhf.entity.Reader;
-import com.jietong.rfid.util.ReaderUtil;
-
-public class SocketConnect extends MainStart{
+public class SocketConnect extends ConnectDeviceManagerJPanel{
 	private static final long serialVersionUID = 1L;
 	private List<ServerThread> socketList = new ArrayList<ServerThread>();
 	private ServerSocket serverSocket = null;
@@ -28,6 +27,7 @@ public class SocketConnect extends MainStart{
 			//PropertiesUtils.setValue(filepath, map);
 			System.out.println("open " + serverSocket);
 			isStartServer = true;
+			
 			if (isStartServer) {
 				sockets = new Thread(new sockets());
 				sockets.start();
@@ -68,17 +68,12 @@ public class SocketConnect extends MainStart{
 					socketList.add(serverThread);
 					ports = client.getPort();
 					String device = client.getInetAddress().getHostAddress();
-					String state = "连接";
-					addToList(listConnect, device,ports, state,0);
-					for (int i = 0; i < ReaderUtil.MAX_DEVICE_NUM; i++) {
-						if (ReaderUtil.readers[i] == null) {
-							ReaderUtil.readers[i] = new Reader();
-							ReaderUtil.readers[i].host = device;
-							ReaderUtil.readers[i].socket = client;
-							ReaderUtil.readers[i].deviceConnected = true;
-							break;
-						}
-					}
+					System.out.println(device);
+					Reader reader = new Reader();
+					reader.host = device;
+					reader.socket = client;
+					ReaderUtil.connectList.add(reader);
+					refreshTablePanel();
 				} catch (IOException e) {
 					//e.printStackTrace();
 				}finally{
@@ -99,12 +94,12 @@ public class SocketConnect extends MainStart{
 				serverSocket.close();
 				System.out.println("关闭服务器成功");
 				System.out.println("close " + serverSocket);
-				for (int i = 0; i < ReaderUtil.MAX_DEVICE_NUM; i++) {
-					if (ReaderUtil.readers[i] != null && ReaderUtil.readers[i].socket != null) {
-						//System.out.println("socket " + ReaderUtil.readers[i].socket);
-						ReaderUtil.readers[i] = null;
-					}
-				}
+//				for (int i = 0; i < ReaderUtil.MAX_DEVICE_NUM; i++) {
+//					if (ReaderUtil.readers[i] != null && ReaderUtil.readers[i].socket != null) {
+//						//System.out.println("socket " + ReaderUtil.readers[i].socket);
+//						ReaderUtil.readers[i] = null;
+//					}
+//				}
 			} catch (IOException e) {
 				//e.printStackTrace();
 				System.out.println("非正常close " + serverSocket);
@@ -134,14 +129,14 @@ public class SocketConnect extends MainStart{
 			String port = null;
 			try {
 				String ports = socket.getInetAddress().getHostAddress();
-				for (int j = 0; j < tbl_showConnectInfo.getRowCount(); j++) {
-					port = (String) tbl_showConnectInfo.getValueAt(j, 1);
-					if (ports.equals(port)) {
-						listConnect.remove(j);
-						tableConnectModel.removeRow(j);
-						break;
-					}
-				}
+//				for (int j = 0; j < tbl_showConnectInfo.getRowCount(); j++) {
+//					port = (String) tbl_showConnectInfo.getValueAt(j, 1);
+//					if (ports.equals(port)) {
+//						listConnect.remove(j);
+//						tableConnectModel.removeRow(j);
+//						break;
+//					}
+//				}
 				writer.close();
 				reader.close();
 				socket.close();
@@ -170,14 +165,14 @@ public class SocketConnect extends MainStart{
 				} finally {
 					if (!socket.isConnected()) {
 						String IP = socket.getInetAddress().getHostAddress();
-						for (int j = 0; j < tbl_showConnectInfo.getRowCount(); j++) {
-							IP2 = (String) tbl_showConnectInfo.getValueAt(j, 1);
-							if (IP.length() > 5) {
-								listConnect.remove(j);
-								tableConnectModel.removeRow(j);
-								break;
-							}
-						}
+//						for (int j = 0; j < tbl_showConnectInfo.getRowCount(); j++) {
+//							IP2 = (String) tbl_showConnectInfo.getValueAt(j, 1);
+//							if (IP.length() > 5) {
+//								listConnect.remove(j);
+//								tableConnectModel.removeRow(j);
+//								break;
+//							}
+//						}
 						isRunning = false;
 					}
 				}

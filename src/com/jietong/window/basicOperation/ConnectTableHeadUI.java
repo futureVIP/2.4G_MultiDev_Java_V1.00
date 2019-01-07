@@ -7,7 +7,8 @@ import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicTableHeaderUI;
 import javax.swing.table.JTableHeader;
 
-import com.jietong.MainStart;
+import com.jietong.window.util.LanguageUtil;
+import com.jietong.window.view.MainFrame;
 
 
 
@@ -21,7 +22,7 @@ public class ConnectTableHeadUI extends BasicTableHeaderUI {
 
 	public void paint(Graphics g, JComponent c) {
 		header = (JTableHeader) c;
-		JLabel label = getLabel(MainStart.rs.getString("strLvHeadNo"));
+		JLabel label = getLabel(LanguageUtil.rs.getString("strLvHeadNo"));
 		rendererPane.paintComponent(g, label, header, getX(0), 1, getWidth(0),20, true);
 		label = getLabel("IP/COM");
 		rendererPane.paintComponent(g, label, header, getX(1), 2, getWidth(1),20, true);
